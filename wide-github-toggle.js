@@ -25,7 +25,9 @@ const WGH_ACTIONABLE_SELECTOR = [
   '[role="menuitemradio"]',
   '[role="checkbox"]',
 ].join(', ');
-const WGH_RETRY_DELAYS_MS = [0, 250, 1000];
+const WGH_BULK_ACTION_POLL_MS = 250;
+const WGH_BULK_ACTION_IDLE_PASSES = 6;
+const WGH_BULK_ACTION_MAX_DURATION_MS = 120000;
 
 let syncScheduled = false;
 let domObserver = null;
@@ -154,10 +156,53 @@ function getActionTargets(matcher, shouldClick) {
 }
 
 function runBulkAction(matcher, shouldClick) {
-  WGH_RETRY_DELAYS_MS.forEach((delay) => {
-    window.setTimeout(() => {
-      getActionTargets(matcher, shouldClick).forEach((element) => element.click());
-    }, delay);
+  return new Promise((resolve) => {
+    const initialScrollY = window.scrollY;
+    const startedAt = Date.now();
+    let idlePasses = 0;
+    let lastFileCount = -1;
+    let lastScrollHeight = -1;
+
+    function finish() {
+      window.scrollTo(0, initialScrollY);
+      resolve();
+    }
+
+    function step() {
+      const targets = getActionTargets(matcher, shouldClick);
+      targets.forEach((element) => element.click());
+
+      const fileCount = document.querySelectorAll('.file.js-file, .js-file-header[data-path]').length;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const maxScrollY = Math.max(0, scrollHeight - window.innerHeight);
+      const scrollStep = Math.max(400, Math.floor(window.innerHeight * 0.85));
+      const nextScrollY = Math.min(maxScrollY, window.scrollY + scrollStep);
+      const didScroll = nextScrollY > window.scrollY;
+      const reachedPageEnd = maxScrollY - nextScrollY <= 1;
+
+      if (didScroll) {
+        window.scrollTo(0, nextScrollY);
+      }
+
+      const pageStillChanging = targets.length > 0 ||
+        fileCount !== lastFileCount ||
+        scrollHeight !== lastScrollHeight ||
+        didScroll;
+
+      idlePasses = pageStillChanging ? 0 : idlePasses + 1;
+      lastFileCount = fileCount;
+      lastScrollHeight = scrollHeight;
+
+      if ((reachedPageEnd && idlePasses >= WGH_BULK_ACTION_IDLE_PASSES) ||
+        Date.now() - startedAt >= WGH_BULK_ACTION_MAX_DURATION_MS) {
+        finish();
+        return;
+      }
+
+      window.setTimeout(step, WGH_BULK_ACTION_POLL_MS);
+    }
+
+    step();
   });
 }
 
@@ -202,8 +247,7 @@ function createActionButton(label, title, action) {
   button.title = title;
   button.addEventListener('click', () => {
     setButtonBusy(button, true);
-    action();
-    window.setTimeout(() => setButtonBusy(button, false), WGH_RETRY_DELAYS_MS[WGH_RETRY_DELAYS_MS.length - 1] + 250);
+    Promise.resolve(action()).finally(() => setButtonBusy(button, false));
   });
   return button;
 }
