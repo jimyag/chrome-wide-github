@@ -104,4 +104,38 @@
     max-width: none;
   }
 
+  /* PR Page (May 2026) */
+  body:not(.wgh-disabled) .application-main div[data-target="react-app.reactRoot"] div[class^='prc-PageLayout-ContentWrapper'] {
+    max-width: none;
+  }
+
+  /* PR files actions */
+  body:not(.wgh-disabled) .wgh-pr-action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-action-button {
+    padding: 5px 12px;
+    border: 1px solid var(--button-default-borderColor-rest, var(--borderColor-default, #d0d7de));
+    border-radius: 6px;
+    background: var(--button-default-bgColor-rest, var(--bgColor-default, #ffffff));
+    color: var(--fgColor-default, #1f2328);
+    font: 500 12px/20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-action-button:hover:not(:disabled) {
+    background: var(--button-default-bgColor-hover, #f3f4f6);
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-action-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
 }
