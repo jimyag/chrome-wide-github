@@ -135,7 +135,58 @@
 
   body:not(.wgh-disabled) .wgh-pr-action-button:disabled {
     opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-action-button.is-busy {
     cursor: wait;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-categories {
+    position: relative;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-categories summary {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-category-options {
+    position: absolute;
+    z-index: 100;
+    top: 100%;
+    left: 0;
+    min-width: 210px;
+    margin: 4px 0 0;
+    padding: 8px 12px;
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 6px;
+    background: var(--bgColor-default, #ffffff);
+    color: var(--fgColor-default, #1f2328);
+    box-shadow: var(--shadow-floating-small, 0 4px 12px #0002);
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-category-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-preview,
+  body:not(.wgh-disabled) .wgh-pr-progress,
+  body:not(.wgh-disabled) .wgh-pr-result-details {
+    font-size: 12px;
+  }
+
+  body:not(.wgh-disabled) .wgh-pr-result-details ul {
+    max-height: 240px;
+    max-width: min(720px, 90vw);
+    overflow: auto;
+    overflow-wrap: anywhere;
   }
 
 }
